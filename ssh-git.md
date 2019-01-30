@@ -4,19 +4,19 @@ Git
 
 ```
 $ git push -u origin master
-ERROR: Permission to KenetGit/start_your_ssm.git denied to fangjm56.
+ERROR: Permission to xxxx/start_your_ssm.git denied to xxxx.
 fatal: Could not read from remote repository.
 
 Please make sure you have the correct access rights
 and the repository exists.
 ```
 
-> 出现这个问题是因为计算机本地的SSH配置文件(RSA加密)是属于fangjm56的，而不是KenetGit，所以需要先清除本地的fangjm56的SSH文件，所在目录：/c/Users/jiamoufang/.ssh/
+> 出现这个问题是因为计算机本地的SSH配置文件(RSA加密)是属于fangjm56的，而不是KenetGit，所以需要先清除本地的fangjm56的SSH文件，所在目录：/c/Users/jiamoufang/.ssh/。一台计算机上有多个github账户时就容易出现这种冲突问题。
 
 1. git 下输入，默认完成操作即可。
 
 ```
- ssh-keygen -t rsa -C "fangjiamou@gmail.com"
+ ssh-keygen -t rsa -C "xxxx@gmail.com"
 ```
 
 2. Github账户设置settings中设置SSH即可。
