@@ -42,6 +42,9 @@ and the repository exists.
 
 3. 添加联系
 
-> $ git remote add origin ssh:git@github.com/KenetGit/gitNotes.git
+> $ git remote add origin ssh:git@github.com:KenetGit/gitNotes.git
+>
+> （后面如果还是提交失败的话）git remote set-url origin git@github.com:KenetGit/gitNotes.git
 
 4. 
+   
