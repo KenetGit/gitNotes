@@ -85,7 +85,92 @@ SpringMVC 视图解析器InternalResourceViewResolver：https://blog.csdn.net/si
 
    
 
-2. @RequestBody是作用在形参列表上，用于将前台发送过来固定格式的数据【xml 格式或者 json等】封装为对应的 JavaBean 对象，封装时使用到的一个对象是系统默认配置的 HttpMessageConverter进行解析，然后封装到形参上。一般是post请求的时候才会使用这个请求，把参数丢在requestbody里面。
+2. @RequestBody是作用在形参列表上，用于将前台发送过来固定格式的数据【xml 格式或者 json等】封装为对应的 JavaBean 对象，封装时使用到的一个对象是系统默认配置的 HttpMessageConverter进行解析，然后封装到形参上。（理解转换器如何将一个字符串转换为一个Java对象）
+
+   @requestBody注解常用来处理content-type不是默认的application/x-www-form-urlcoded编码的内容，比如说：application/json或者是application/xml等。一般情况下来说常用其来处理application/json类型。
+
+   通过@requestBody可以将**请求体中的JSON字符串**绑定到相应的bean上，当然，也可以将其分别绑定到对应的字符串上。
+
+     例如说以下情况：
+
+   ```javascript
+   　　　　$.ajax({
+   　　　　　　　　url:"/login",
+   　　　　　　　　type:"POST",
+   　　　　　　　　data:'{"userName":"admin","pwd","admin123"}',
+   　　　　　　　　content-type:"application/json charset=utf-8",
+   　　　　　　　　success:function(data){
+   　　　　　　　　　　alert("request success ! ");
+   　　　　　　　　}
+   　　　　});
+   
+   ```
+
+   ```java
+   @requestMapping("/login")
+   public void login(@requestBody String userName,@requestBody String pwd){
+   　　　System.out.println(userName+" ："+pwd);
+   }  
+   ```
+
+   这种情况是将JSON字符串中的两个变量的值分别赋予了两个字符串，但是呢假如我有一个User类，拥有如下字段：
+
+   ```java
+   String userName;
+   String pwd;
+   ```
+
+
+   那么上述参数可以改为以下形式：@requestBody User user 这种形式会将JSON字符串中的值赋予user中对应的属性上。需要注意的是，**JSON字符串中的key必须对应user中的属性名，否则是转换不了的**。
+
+   在一些特殊情况@requestBody也可以用来处理content-type类型为application/x-www-form-urlcoded的内容，只不过这种方式不是很常用，在处理这类请求的时候，**@requestBody会将处理结果放到一个MultiValueMap<String,String>中**，这种情况一般在特殊情况下才会使用，例如jQuery easyUI的datagrid请求数据的时候需要使用到这种方式、小型项目只创建一个POJO类的话也可以使用这种接受方式。
+
+3. 总结
+
+   (1) @ResponseBody
+
+   该注解用于将Controller的方法返回的对象，通过适当的HttpMessageConverter转换为指定格式后，写**入到Response对象的body数据区**。配合@ResponseBody注解，以及**HTTP Request Header中的Accept属性**，Controller返回的Java对象可以自动被转换成对应的XML或者JSON数据。
+
+   这个过程是通过HttpMessageConverter即消息转换器机制实现的。实现对象转xml的类为Jaxb2RootElementHttpMessageConverter，转换成功的条件：
+
+   a) 返回对象的类具有XmlRootElement注解。
+   b) 请求头中的Accept属性包含application/xml。
+
+   **对象转换成json数据时需要把Jackson2或者GSON加入工程的class path**，Spring就会**自动**把GsonHttpMessageConverter加进来，这样Spring就会选择MappingJackson2HttpMessageConverter或者GsonHttpMessageConverter来进行数据转换。
+
+   (2) @RequestBody
+
+   该注解用于读取Request请求的body部分数据，使用系统默认配置的HttpMessageConverter进行解析，然后把相应的数据绑定到要返回的对象上 ,再把HttpMessageConverter返回的对象数据绑定到 controller中方法的参数上。配合@RequestBody注解，以及HTTP Request Header中的Content-Type属性，HTTP Request Body中包含的XML或者JSON数据可以自动被转换成对应的Java对象。
+
+   原理参考：https://blog.csdn.net/geyuezhen/article/details/52853675
+
+4. <mvc:annotation-driven />有三个可选配置项
+
+```xml
+<mvc:annotation-driven  message-codes-resolver ="bean ref" 
+	validator="" conversion-service="">
+ 
+     <mvc:return-value-handlers>
+        <bean></bean>
+    </mvc:return-value-handlers>
+ 
+ 	<!--允许注册实现了HandlerMethodArgumentResolver接口的bean，
+		来对handlerMethod中的用户自定义的参数或annotation进行解析 -->
+    <mvc:argument-resolvers>
+
+    </mvc:argument-resolvers>
+ 
+    <!--HttpMessageConverter主要是用来转换request的内容到一定的格式，
+		转换输出的内容的到response。即：controller方法返回的类型 -->
+    <!--MappingJacksonHttpMessageConverter是其中一个默认的配置 -->
+    <mvc:message-converters>
+ 
+    </mvc:message-converters>
+ 
+</mvc:annotation-driven>
+```
+
+
 
 (5) Spring-MVC 4.x 对跨域问题的支持
 
